@@ -27,7 +27,7 @@ public class FilmController {
             FilmValidator.validate(film);
             film.setId(nextId++);
             films.put(film.getId(), film);
-            log.info("Доба��лен новый фильм: id={}, название={}", film.getId(), film.getName());
+            log.info("Добавлен новый фильм: id={}, название={}", film.getId(), film.getName());
             return film;
         } catch (ValidationException e) {
             log.error("Ошибка валидации при добавлении фильма: {}", e.getMessage());
