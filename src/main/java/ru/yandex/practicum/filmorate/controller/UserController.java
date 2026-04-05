@@ -1,0 +1,66 @@
+package ru.yandex.practicum.filmorate.controller;
+
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
+import ru.yandex.practicum.filmorate.exception.ValidationException;
+import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.validator.UserValidator;
+
+import java.util.*;
+
+@Slf4j
+@RestController
+@RequestMapping("/users")
+public class UserController {
+
+    private final Map<Integer, User> users = new HashMap<>();
+    private int nextId = 1;
+
+    @GetMapping
+    public Collection<User> getAllUsers() {
+        log.info("Получение списка всех пользователей. Всего пользователей: {}", users.size());
+        return users.values();
+    }
+
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    public User createUser(@RequestBody User user) {
+
+        if (user == null) {
+            throw new ValidationException("Пользователь не может быть null");
+        }
+
+        UserValidator.validate(user);
+
+        user.setId(nextId++);
+        users.put(user.getId(), user);
+
+        log.info("Создан новый пользователь: id={}, логин={}", user.getId(), user.getLogin());
+        return user;
+    }
+
+    @PutMapping
+    public User updateUser(@RequestBody User user) {
+
+        if (user == null) {
+            throw new ValidationException("Пользователь не может быть null");
+        }
+
+        if (user.getId() == null) {
+            throw new ValidationException("Id пользователя не должен быть null");
+        }
+
+        if (!users.containsKey(user.getId())) {
+            throw new NotFoundException("Пользователь с id=" + user.getId() + " не найден");
+        }
+
+        UserValidator.validate(user);
+
+        users.put(user.getId(), user);
+
+        log.info("Обновлен пользователь: id={}, логин={}", user.getId(), user.getLogin());
+        return user;
+    }
+}
