@@ -23,7 +23,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, String>> handleException(Exception e) {
-        log.error("Неожиданная ошибка: {}", e.getMessage());
+        log.error("Неожиданная ошибка", e);
         Map<String, String> errorResponse = new HashMap<>();
         errorResponse.put("error", "Внутренняя ошибка сервера");
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);

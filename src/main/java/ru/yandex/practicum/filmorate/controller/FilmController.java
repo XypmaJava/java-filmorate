@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
@@ -23,32 +24,33 @@ public class FilmController {
     }
 
     @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
     public Film addFilm(@RequestBody Film film) {
-        try {
-            FilmValidator.validate(film);
-            film.setId(nextId++);
-            films.put(film.getId(), film);
-            log.info("Добавлен новый фильм: id={}, название={}", film.getId(), film.getName());
-            return film;
-        } catch (ValidationException e) {
-            log.error("Ошибка валидации при добавлении фильма: {}", e.getMessage());
-            throw e;
-        }
+        FilmValidator.validate(film);
+        film.setId(nextId++);
+        films.put(film.getId(), film);
+        log.info("Добавлен новый фильм: id={}, название={}", film.getId(), film.getName());
+        return film;
     }
 
     @PutMapping
     public Film updateFilm(@RequestBody Film film) {
-        try {
-            if (!films.containsKey(film.getId())) {
-                throw new NotFoundException("Фильм с id=" + film.getId() + " не найден");
-            }
-            FilmValidator.validate(film);
-            films.put(film.getId(), film);
-            log.info("Обновлен фильм: id={}, название={}", film.getId(), film.getName());
-            return film;
-        } catch (ValidationException e) {
-            log.error("Ошибка валидации при обновлении фильма: {}", e.getMessage());
-            throw e;
+        if (film == null) {
+            throw new ValidationException("Фильм не может быть null");
         }
+
+        if (film.getId() == null) {
+            throw new ValidationException("Id фильма не должен быть null");
+        }
+
+        if (!films.containsKey(film.getId())) {
+            throw new NotFoundException("Фильм с id=" + film.getId() + " не найден");
+        }
+
+        FilmValidator.validate(film);
+
+        films.put(film.getId(), film);
+        log.info("Обновлен фильм: id={}, название={}", film.getId(), film.getName());
+        return film;
     }
 }
